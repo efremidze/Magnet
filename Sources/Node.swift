@@ -10,6 +10,25 @@ import SpriteKit
 
 @objcMembers open class Node: MaskNode {
     
+    /**
+     The internal accessibilityPath used by the node.
+     */
+    private var overridenAccessibilityPath: UIBezierPath?
+    
+    open override var accessibilityPath: UIBezierPath? {
+        get {
+            if let path = self.overridenAccessibilityPath {
+                return path
+            }
+            
+            return UIBezierPath(ovalIn: self.accessibilityFrame)
+        }
+        
+        set {
+            self.overridenAccessibilityPath = newValue
+        }
+    }
+    
     public lazy var label: SKMultilineLabelNode = { [unowned self] in
         let label = SKMultilineLabelNode()
         label.fontName = "Avenir-Black"
@@ -76,8 +95,10 @@ import SpriteKit
             guard isSelected != oldValue else { return }
             if isSelected {
                 selectedAnimation()
+                accessibilityTraits = UIAccessibilityTraitSelected
             } else {
                 deselectedAnimation()
+                accessibilityTraits = UIAccessibilityTraitNone
             }
         }
     }
@@ -116,6 +137,9 @@ import SpriteKit
     }
     
     open func configure(text: String?, image: UIImage?, color: UIColor) {
+        self.isAccessibilityElement = true
+        self.shouldGroupAccessibilityChildren = true
+        self.accessibilityLabel = text
         self.text = text
         self.image = image
         self.color = color
