@@ -76,8 +76,10 @@ import SpriteKit
             guard isSelected != oldValue else { return }
             if isSelected {
                 selectedAnimation()
+                accessibilityTraits = UIAccessibilityTraitSelected
             } else {
                 deselectedAnimation()
+                accessibilityTraits = UIAccessibilityTraitNone
             }
         }
     }
@@ -116,6 +118,7 @@ import SpriteKit
     }
     
     open func configure(text: String?, image: UIImage?, color: UIColor) {
+        self.accessibilityLabel = text
         self.text = text
         self.image = image
         self.color = color
@@ -162,7 +165,26 @@ open class MaskNode: SKShapeNode {
     
     let mask: SKCropNode
     let maskOverlay: SKShapeNode
-    
+
+    /**
+     The internal accessibilityPath used by the node.
+     */
+    private var overridenAccessibilityPath: UIBezierPath?
+
+    open override var accessibilityPath: UIBezierPath? {
+        get {
+            if let path = self.overridenAccessibilityPath {
+                return path
+            }
+            
+            return UIBezierPath(ovalIn: self.accessibilityFrame)
+        }
+        
+        set {
+            self.overridenAccessibilityPath = newValue
+        }
+    }
+
     public init(path: CGPath) {
         mask = SKCropNode()
         mask.maskNode = {
@@ -177,6 +199,8 @@ open class MaskNode: SKShapeNode {
         
         super.init()
         self.path = path
+        self.isAccessibilityElement = true
+        self.shouldGroupAccessibilityChildren = true
         
         self.addChild(mask)
         self.addChild(maskOverlay)
