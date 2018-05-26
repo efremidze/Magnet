@@ -10,25 +10,6 @@ import SpriteKit
 
 @objcMembers open class Node: MaskNode {
     
-    /**
-     The internal accessibilityPath used by the node.
-     */
-    private var overridenAccessibilityPath: UIBezierPath?
-    
-    open override var accessibilityPath: UIBezierPath? {
-        get {
-            if let path = self.overridenAccessibilityPath {
-                return path
-            }
-            
-            return UIBezierPath(ovalIn: self.accessibilityFrame)
-        }
-        
-        set {
-            self.overridenAccessibilityPath = newValue
-        }
-    }
-    
     public lazy var label: SKMultilineLabelNode = { [unowned self] in
         let label = SKMultilineLabelNode()
         label.fontName = "Avenir-Black"
@@ -137,8 +118,6 @@ import SpriteKit
     }
     
     open func configure(text: String?, image: UIImage?, color: UIColor) {
-        self.isAccessibilityElement = true
-        self.shouldGroupAccessibilityChildren = true
         self.accessibilityLabel = text
         self.text = text
         self.image = image
@@ -186,7 +165,26 @@ open class MaskNode: SKShapeNode {
     
     let mask: SKCropNode
     let maskOverlay: SKShapeNode
-    
+
+    /**
+     The internal accessibilityPath used by the node.
+     */
+    private var overridenAccessibilityPath: UIBezierPath?
+
+    open override var accessibilityPath: UIBezierPath? {
+        get {
+            if let path = self.overridenAccessibilityPath {
+                return path
+            }
+            
+            return UIBezierPath(ovalIn: self.accessibilityFrame)
+        }
+        
+        set {
+            self.overridenAccessibilityPath = newValue
+        }
+    }
+
     public init(path: CGPath) {
         mask = SKCropNode()
         mask.maskNode = {
@@ -201,6 +199,8 @@ open class MaskNode: SKShapeNode {
         
         super.init()
         self.path = path
+        self.isAccessibilityElement = true
+        self.shouldGroupAccessibilityChildren = true
         
         self.addChild(mask)
         self.addChild(maskOverlay)
